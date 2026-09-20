@@ -5,7 +5,7 @@ class Module3Dialog(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Step 3")
-        self.geometry("300x120")
+        self.geometry("300x220")
         self.resizable(False, False)
         self.transient(parent)
         self.grab_set()
@@ -20,16 +20,16 @@ class Module3Dialog(tk.Toplevel):
             self.listbox.insert(tk.END, g)
 
         self.listbox.selection_set(0)
+        self.listbox.bind("<Double-Button-1>", lambda event: self.on_ok())
         btn_frame = tk.Frame(self)
         btn_frame.pack(pady=10)
 
-        btn_ok = tk.Button(btn_frame, text="OK",
-                           width=8, command=self.on_finish)
-        btn_ok.pack(side=tk.LEFT, padx=3)
+        btn_ok = tk.Button(btn_frame, text="OK", width=8, command=self.on_ok)
+        btn_ok.pack(side=tk.LEFT, padx=5)
 
         btn_cancel = tk.Button(btn_frame, text="Cancel",
                                width=8, command=self.on_cancel)
-        btn_cancel.pack(side=tk.LEFT, padx=3)
+        btn_cancel.pack(side=tk.LEFT, padx=5)
 
     def on_ok(self):
         cur_sel = self.listbox.curselection()
@@ -45,4 +45,4 @@ class Module3Dialog(tk.Toplevel):
 def run_step3(parent):
     dlg = Module3Dialog(parent)
     parent.wait_window(dlg)
-    return dlg.result
+    return dlg.selected_group
