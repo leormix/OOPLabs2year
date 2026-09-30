@@ -8,11 +8,11 @@ import module3
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Головне вікно")
+        self.title("Main window")
         self.geometry("400x400")
         self.resizable(False, False)
 
-        self.selected_group = 'Grupa ne vibrana'
+        self.selected_group = 'No group selected'
         self.lbl_title = tk.Label(self, text='Result of choice')
         self.lbl_title.pack(pady=45)
 
