@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from shapes import PointShape
 from shapes import LineShape
+from shapes import RectangleShape
 
 
 class PaintApp(tk.Tk):
@@ -13,9 +14,12 @@ class PaintApp(tk.Tk):
         self.current_tool = tk.StringVar(value="Dot")
         self.shapes = []
 
+# Lien rect..
+
         self.start_x = None
         self.start_y = None
         self.current_rubber_line = None
+        self.current_rubber_rect = None
 
         self.init_menu()
 
@@ -66,19 +70,37 @@ class PaintApp(tk.Tk):
                 shape = PointShape(event.x, event.y)
                 self.shapes.append(shape)
                 shape.show(self.canvas)
-        elif tool == "Line":
+        elif tool in ("Line", "Rectangle"):
             self.start_x = event.x
             self.start_y = event.y
 
     def on_motion(self, event):
-        if self.current_tool.get() == "Line" and self.start_x is not None:
+        tool = self.current_tool.get()
+        if self.start_x is None:
+            return
+
+        if tool == "Line":
             if self.current_rubber_line:
                 self.canvas.delete(self.current_rubber_line)
             self.current_rubber_line = self.canvas.create_line(
-                self.start_x, self.start_y, event.x, event.y)
+                self.start_x, self.start_y, event.x, event.y,
+                fill="blue"
+            )
+        elif tool == "Rectangle":
+            if self.current_rubber_rect:
+                self.canvas.delete(self.current_rubber_rect)
+            self.current_rubber_rect = self.canvas.create_rectangle(
+                self.start_x, self.start_y, event.x, event.y,
+                outline="blue", fill=""
+            )
 
     def on_release(self, event):
-        if self.current_tool.get() == "Line" and self.start_x is not None:
+        tool = self.current_tool.get()
+
+        if self.start_x == None:
+            return
+
+        if tool == "Line":
             if self.current_rubber_line:
                 self.canvas.delete(self.current_rubber_line)
                 self.current_rubber_line = None
@@ -90,6 +112,20 @@ class PaintApp(tk.Tk):
 
             self.start_x = None
             self.start_y = None
+
+        elif tool == "Rectangle":
+            if self.current_rubber_line:
+                self.canvas.delete(self.current_rubber_line)
+                self.current_rubber_line = None
+
+            if len(self.shapes) < 102:
+                shape = RectangleShape(
+                    self.start_x, self.start_y, event.x, event.y)
+                self.shapes.append(shape)
+                shape.show(self.canvas)
+
+        self.start_x = None
+        self.start_y = None
 
 
 if __name__ == "__main__":

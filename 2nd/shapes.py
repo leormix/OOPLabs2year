@@ -31,3 +31,11 @@ class LineShape(Shape):
             self.x1, self.y1, self.x2, self.y2,
             fill="black",
         )
+
+
+class RectangleShape(Shape):
+    def show(self, canvas):
+        return canvas.create_rectangle(
+            self.x1, self.y1, self.x2, self.y2,
+            fill="orchid3", outline='black'
+        )
