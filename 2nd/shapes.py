@@ -43,8 +43,8 @@ class RectangleShape(Shape):
 
 class EllipseShape(Shape):
     def show(self, canvas):
-        rx = self.x1 - self.x2
-        ry = self.y1 - self.y2
+        rx = (self.x1 - self.x2)
+        ry = (self.y1 - self.y2)
 
         return canvas.create_oval(
             self.x1 - rx, self.y1 - ry, self.x1 + rx, self.y1 + ry,

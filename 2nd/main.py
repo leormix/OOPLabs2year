@@ -97,13 +97,13 @@ class PaintApp(tk.Tk):
             )
 
         elif tool == "Ellipse":
-            if self.current_rubber_rect:
+            if self.current_rubber_ellipse:
                 self.canvas.delete(self.current_rubber_ellipse)
 
-            rx = event.x - self.start_x
-            ry = event.y - self.start_y
+            rx = (event.x - self.start_x)
+            ry = (event.y - self.start_y)
 
-            self.current_rubber_rect = self.canvas.create_oval(
+            self.current_rubber_ellipse = self.canvas.create_oval(
                 self.start_x - rx, self.start_y - ry,
                 self.start_x + rx, self.start_y + ry,
                 outline="blue", fill=""
@@ -139,7 +139,7 @@ class PaintApp(tk.Tk):
         elif tool == "Ellipse":
             if self.current_rubber_line:
                 self.canvas.delete(self.current_rubber_ellipse)
-                self.current_rubber_line = None
+                self.current_rubber_ellipse = None
 
             if len(self.shapes) < 102:
                 shape = EllipseShape(
