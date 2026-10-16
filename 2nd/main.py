@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from shapes import PointShape
+from shapes import LineShape
 
 
 class PaintApp(tk.Tk):
@@ -12,12 +13,18 @@ class PaintApp(tk.Tk):
         self.current_tool = tk.StringVar(value="Dot")
         self.shapes = []
 
+        self.start_x = None
+        self.start_y = None
+        self.current_rubber_line = None
+
         self.init_menu()
 
         self.canvas = tk.Canvas(self, bg="white")
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
-        self.canvas.bind("<ButtonPress-1>", self.on_canvas_click)
+        self.canvas.bind("<ButtonPress-1>", self.on_press)
+        self.canvas.bind("<B1-Motion>", self.on_motion)
+        self.canvas.bind("<ButtonRelease-1>", self.on_release)
 
     def init_menu(self):
         menubar = tk.Menu(self)
@@ -52,12 +59,37 @@ class PaintApp(tk.Tk):
     def show_about(self):
         messagebox.showinfo("Help", 'Some info')
 
-    def on_canvas_click(self, event):
-        if self.current_tool.get() == "Dot":
+    def on_press(self, event):
+        tool = self.current_tool.get()
+        if tool == "Dot":
             if len(self.shapes) < 102:
                 shape = PointShape(event.x, event.y)
                 self.shapes.append(shape)
                 shape.show(self.canvas)
+        elif tool == "Line":
+            self.start_x = event.x
+            self.start_y = event.y
+
+    def on_motion(self, event):
+        if self.current_tool.get() == "Line" and self.start_x is not None:
+            if self.current_rubber_line:
+                self.canvas.delete(self.current_rubber_line)
+            self.current_rubber_line = self.canvas.create_line(
+                self.start_x, self.start_y, event.x, event.y)
+
+    def on_release(self, event):
+        if self.current_tool.get() == "Line" and self.start_x is not None:
+            if self.current_rubber_line:
+                self.canvas.delete(self.current_rubber_line)
+                self.current_rubber_line = None
+
+            if len(self.shapes) < 102:
+                shape = LineShape(self.start_x, self.start_y, event.x, event.y)
+                self.shapes.append(shape)
+                shape.show(self.canvas)
+
+            self.start_x = None
+            self.start_y = None
 
 
 if __name__ == "__main__":
