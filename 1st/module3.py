@@ -14,7 +14,7 @@ class Module3Dialog(tk.Toplevel):
         self.listbox = tk.Listbox(self, height=6)
         self.listbox.pack(fill=tk.BOTH, expand=True, padx=15, pady=10)
 
-        groups = ["IM-51", "IM-52", "IM-52", "IM-53", "IM-54"]
+        groups = ["IM-51", "IM-52", "IM-55", "IM-53", "IM-54"]
 
         for g in groups:
             self.listbox.insert(tk.END, g)
