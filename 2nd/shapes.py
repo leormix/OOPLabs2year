@@ -48,5 +48,5 @@ class EllipseShape(Shape):
 
         return canvas.create_oval(
             self.x1 - rx, self.y1 - ry, self.x1 + rx, self.y1 + ry,
-            outline='black', fill='aquamarine3'
+            outline='black', fill=''
         )
