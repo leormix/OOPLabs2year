@@ -39,3 +39,14 @@ class RectangleShape(Shape):
             self.x1, self.y1, self.x2, self.y2,
             fill="orchid3", outline='black'
         )
+
+
+class EllipseShape(Shape):
+    def show(self, canvas):
+        rx = self.x1 - self.x2
+        ry = self.y1 - self.y2
+
+        return canvas.create_oval(
+            self.x1 - rx, self.y1 - ry, self.x1 + rx, self.y1 + ry,
+            outline='black', fill='aquamarine3'
+        )

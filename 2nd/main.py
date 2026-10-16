@@ -3,6 +3,7 @@ from tkinter import messagebox
 from shapes import PointShape
 from shapes import LineShape
 from shapes import RectangleShape
+from shapes import EllipseShape
 
 
 class PaintApp(tk.Tk):
@@ -20,6 +21,7 @@ class PaintApp(tk.Tk):
         self.start_y = None
         self.current_rubber_line = None
         self.current_rubber_rect = None
+        self.current_rubber_ellipse = None
 
         self.init_menu()
 
@@ -70,7 +72,7 @@ class PaintApp(tk.Tk):
                 shape = PointShape(event.x, event.y)
                 self.shapes.append(shape)
                 shape.show(self.canvas)
-        elif tool in ("Line", "Rectangle"):
+        elif tool in ("Line", "Rectangle", "Ellipse"):
             self.start_x = event.x
             self.start_y = event.y
 
@@ -94,6 +96,19 @@ class PaintApp(tk.Tk):
                 outline="blue", fill=""
             )
 
+        elif tool == "Ellipse":
+            if self.current_rubber_rect:
+                self.canvas.delete(self.current_rubber_ellipse)
+
+            rx = event.x - self.start_x
+            ry = event.y - self.start_y
+
+            self.current_rubber_rect = self.canvas.create_oval(
+                self.start_x - rx, self.start_y - ry,
+                self.start_x + rx, self.start_y + ry,
+                outline="blue", fill=""
+            )
+
     def on_release(self, event):
         tool = self.current_tool.get()
 
@@ -110,16 +125,24 @@ class PaintApp(tk.Tk):
                 self.shapes.append(shape)
                 shape.show(self.canvas)
 
-            self.start_x = None
-            self.start_y = None
-
         elif tool == "Rectangle":
             if self.current_rubber_line:
-                self.canvas.delete(self.current_rubber_line)
+                self.canvas.delete(self.current_rubber_rect)
                 self.current_rubber_line = None
 
             if len(self.shapes) < 102:
                 shape = RectangleShape(
+                    self.start_x, self.start_y, event.x, event.y)
+                self.shapes.append(shape)
+                shape.show(self.canvas)
+
+        elif tool == "Ellipse":
+            if self.current_rubber_line:
+                self.canvas.delete(self.current_rubber_ellipse)
+                self.current_rubber_line = None
+
+            if len(self.shapes) < 102:
+                shape = EllipseShape(
                     self.start_x, self.start_y, event.x, event.y)
                 self.shapes.append(shape)
                 shape.show(self.canvas)
