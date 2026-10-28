@@ -76,6 +76,8 @@ class PaintApp(tk.Tk):
             self.start_x = event.x
             self.start_y = event.y
 
+# Blue slid
+
     def on_motion(self, event):
         tool = self.current_tool.get()
         if self.start_x is None:
