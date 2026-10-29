@@ -15,13 +15,9 @@ class PaintApp(tk.Tk):
         self.current_tool = tk.StringVar(value="Dot")
         self.shapes = []
 
-# Lien rect..
-
         self.start_x = None
         self.start_y = None
-        self.current_rubber_line = None
-        self.current_rubber_rect = None
-        self.current_rubber_ellipse = None
+        self.current_rubber_shape = None
 
         self.init_menu()
 
@@ -65,47 +61,43 @@ class PaintApp(tk.Tk):
     def show_about(self):
         messagebox.showinfo("Help", 'Some info')
 
+    def add_shape_if_allowed(self, shape):
+        if len(self.shapes) < 102:
+            self.shapes.append(shape)
+            shape.show(self.canvas)
+
     def on_press(self, event):
         tool = self.current_tool.get()
         if tool == "Dot":
-            if len(self.shapes) < 102:
-                shape = PointShape(event.x, event.y)
-                self.shapes.append(shape)
-                shape.show(self.canvas)
+            shape = PointShape(event.x, event.y)
+            self.add_shape_if_allowed(shape)
         elif tool in ("Line", "Rectangle", "Ellipse"):
             self.start_x = event.x
             self.start_y = event.y
-
-# Blue slid
 
     def on_motion(self, event):
         tool = self.current_tool.get()
         if self.start_x is None:
             return
 
+        if self.current_rubber_shape:
+            self.canvas.delete(self.current_rubber_shape)
+            self.current_rubber_shape = None
+
         if tool == "Line":
-            if self.current_rubber_line:
-                self.canvas.delete(self.current_rubber_line)
-            self.current_rubber_line = self.canvas.create_line(
+            self.current_rubber_shape = self.canvas.create_line(
                 self.start_x, self.start_y, event.x, event.y,
                 fill="blue"
             )
         elif tool == "Rectangle":
-            if self.current_rubber_rect:
-                self.canvas.delete(self.current_rubber_rect)
-            self.current_rubber_rect = self.canvas.create_rectangle(
+            self.current_rubber_shape = self.canvas.create_rectangle(
                 self.start_x, self.start_y, event.x, event.y,
                 outline="blue", fill=""
             )
-
         elif tool == "Ellipse":
-            if self.current_rubber_ellipse:
-                self.canvas.delete(self.current_rubber_ellipse)
-
             rx = (event.x - self.start_x)
             ry = (event.y - self.start_y)
-
-            self.current_rubber_ellipse = self.canvas.create_oval(
+            self.current_rubber_shape = self.canvas.create_oval(
                 self.start_x - rx, self.start_y - ry,
                 self.start_x + rx, self.start_y + ry,
                 outline="blue", fill=""
@@ -117,37 +109,22 @@ class PaintApp(tk.Tk):
         if self.start_x == None:
             return
 
+        shape = None
+
         if tool == "Line":
-            if self.current_rubber_line:
-                self.canvas.delete(self.current_rubber_line)
-                self.current_rubber_line = None
-
-            if len(self.shapes) < 102:
-                shape = LineShape(self.start_x, self.start_y, event.x, event.y)
-                self.shapes.append(shape)
-                shape.show(self.canvas)
-
+            shape = LineShape(self.start_x, self.start_y, event.x, event.y)
         elif tool == "Rectangle":
-            if self.current_rubber_line:
-                self.canvas.delete(self.current_rubber_rect)
-                self.current_rubber_line = None
-
-            if len(self.shapes) < 102:
-                shape = RectangleShape(
-                    self.start_x, self.start_y, event.x, event.y)
-                self.shapes.append(shape)
-                shape.show(self.canvas)
-
+            shape = RectangleShape(
+                self.start_x, self.start_y, event.x, event.y)
         elif tool == "Ellipse":
-            if self.current_rubber_line:
-                self.canvas.delete(self.current_rubber_ellipse)
-                self.current_rubber_ellipse = None
+            shape = EllipseShape(self.start_x, self.start_y, event.x, event.y)
 
-            if len(self.shapes) < 102:
-                shape = EllipseShape(
-                    self.start_x, self.start_y, event.x, event.y)
-                self.shapes.append(shape)
-                shape.show(self.canvas)
+        if self.current_rubber_shape:
+            self.canvas.delete(self.current_rubber_shape)
+            self.current_rubber_shape = None
+
+        if shape:
+            self.add_shape_if_allowed(shape)
 
         self.start_x = None
         self.start_y = None
