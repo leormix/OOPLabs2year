@@ -6,6 +6,41 @@ from shapes import RectangleShape
 from shapes import EllipseShape
 
 
+TOOLS = [
+    ("Dot", "Крапка"),
+    ("Line", "Лінія"),
+    ("Rectangle", "Прямокутник"),
+    ("Ellipse", "Еліпс"),
+]
+
+SHAPE_CLASSES = {
+    "Line": LineShape,
+    "Rectangle": RectangleShape,
+    "Ellipse": EllipseShape,
+}
+
+
+class Tooltip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tip = None
+        widget.bind("<Enter>", self.show)
+        widget.bind("<Leave>", self.hide)
+
+    def show(self, event):
+        self.tip = tk.Toplevel(self.widget)
+        self.tip.wm_overrideredirect(True)  # без рамки вікна
+        self.tip.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+        tk.Label(self.tip, text=self.text, bg="lightyellow",
+                 relief=tk.SOLID, bd=1).pack()
+
+    def hide(self, event):
+        if self.tip:
+            self.tip.destroy()
+            self.tip = None
+
+
 class PaintApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -21,12 +56,16 @@ class PaintApp(tk.Tk):
 
         self.init_menu()
 
+        self.init_toolbar()
+
         self.canvas = tk.Canvas(self, bg="white")
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         self.canvas.bind("<ButtonPress-1>", self.on_press)
         self.canvas.bind("<B1-Motion>", self.on_motion)
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
+
+        self.on_tool_changed()
 
     def init_menu(self):
         menubar = tk.Menu(self)
@@ -37,13 +76,11 @@ class PaintApp(tk.Tk):
 
         objects_menu = tk.Menu(menubar, tearoff=0)
 
-        tools = ["Dot", "Line", "Rectangle", "Ellipse"]
-
-        for tool in tools:
+        for value, name in TOOLS:
             objects_menu.add_radiobutton(
-                label=tool,
+                label=name,
                 variable=self.current_tool,
-                value=tool,
+                value=value,
                 command=self.on_tool_changed
             )
         menubar.add_cascade(label='Objects', menu=objects_menu)
@@ -55,6 +92,23 @@ class PaintApp(tk.Tk):
 
         self.config(menu=menubar)
 
+    def init_toolbar(self):
+        toolbar = tk.Frame(self, bd=1, relief=tk.RAISED)
+        toolbar.pack(side=tk.TOP, fill=tk.X)
+
+        for value, name in TOOLS:
+            btn = tk.Radiobutton(
+                toolbar,
+                text=name,
+                variable=self.current_tool,
+                value=value,
+                indicatoron=False,
+                padx=8,
+                command=self.on_tool_changed
+            )
+            btn.pack(side=tk.LEFT, padx=2, pady=2)
+            Tooltip(btn, name)
+
     def on_tool_changed(self):
         print(f"Chosen instrument: {self.current_tool.get()}")
 
@@ -62,7 +116,7 @@ class PaintApp(tk.Tk):
         messagebox.showinfo("Help", 'Some info')
 
     def add_shape_if_allowed(self, shape):
-        if len(self.shapes) < 102:
+        if len(self.shapes) < 103:
             self.shapes.append(shape)
             shape.show(self.canvas)
 

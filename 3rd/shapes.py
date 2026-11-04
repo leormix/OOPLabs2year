@@ -64,7 +64,7 @@ class EllipseShape(Shape):
         coords = (self.x1, self.y1, self.x2, self.y2)
 
         if rubber:
-            return canvas.create_oval(*coords, **self._rubber_style())
+            return canvas.create_oval(self.x1, self.y1, self.x2, self.y2, **self._rubber_style())
         return canvas.create_oval(
             *coords, outline="black", fill="deepskyblue"
         )
