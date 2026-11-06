@@ -109,11 +109,17 @@ class PaintApp(tk.Tk):
             btn.pack(side=tk.LEFT, padx=2, pady=2)
             Tooltip(btn, name)
 
+    def delete_rubber(self):
+        if self.current_rubber_shape:
+            self.canvas.delete(self.current_rubber_shape)
+            self.current_rubber_shape = None
+
     def on_tool_changed(self):
-        print(f"Chosen instrument: {self.current_tool.get()}")
+        name = dict(TOOLS)[self.current_tool.get()]
+        self.title(f"Lab3 - {name}")
 
     def show_about(self):
-        messagebox.showinfo("Help", 'Some info')
+        messagebox.showinfo("Довідка", 'Лабка Намбер 3')
 
     def add_shape_if_allowed(self, shape):
         if len(self.shapes) < 103:
@@ -134,28 +140,13 @@ class PaintApp(tk.Tk):
         if self.start_x is None:
             return
 
-        if self.current_rubber_shape:
-            self.canvas.delete(self.current_rubber_shape)
-            self.current_rubber_shape = None
+        self.delete_rubber()
 
-        if tool == "Line":
-            self.current_rubber_shape = self.canvas.create_line(
-                self.start_x, self.start_y, event.x, event.y,
-                fill="blue"
-            )
-        elif tool == "Rectangle":
-            self.current_rubber_shape = self.canvas.create_rectangle(
-                self.start_x, self.start_y, event.x, event.y,
-                outline="blue", fill=""
-            )
-        elif tool == "Ellipse":
-            rx = (event.x - self.start_x)
-            ry = (event.y - self.start_y)
-            self.current_rubber_shape = self.canvas.create_oval(
-                self.start_x - rx, self.start_y - ry,
-                self.start_x + rx, self.start_y + ry,
-                outline="blue", fill=""
-            )
+        shape_class = SHAPE_CLASSES.get(tool)
+
+        if shape_class:
+            temp = shape_class(self.start_x, self.start_y, event.x, event.y)
+            self.current_rubber_shape = temp.show(self.canvas, rubber=True)
 
     def on_release(self, event):
         tool = self.current_tool.get()
@@ -165,17 +156,11 @@ class PaintApp(tk.Tk):
 
         shape = None
 
-        if tool == "Line":
-            shape = LineShape(self.start_x, self.start_y, event.x, event.y)
-        elif tool == "Rectangle":
-            shape = RectangleShape(
-                self.start_x, self.start_y, event.x, event.y)
-        elif tool == "Ellipse":
-            shape = EllipseShape(self.start_x, self.start_y, event.x, event.y)
+        shape_class = SHAPE_CLASSES.get(tool)
+        if shape_class:
+            shape = shape_class(self.start_x, self.start_y, event.x, event.y)
 
-        if self.current_rubber_shape:
-            self.canvas.delete(self.current_rubber_shape)
-            self.current_rubber_shape = None
+        self.delete_rubber()
 
         if shape:
             self.add_shape_if_allowed(shape)
