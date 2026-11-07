@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 from tkinter import messagebox
 from shapes import PointShape
@@ -5,8 +6,6 @@ from shapes import LineShape
 from shapes import RectangleShape
 from shapes import EllipseShape
 
-
-# UPd list dict
 
 TOOLS = [
     ("Dot", "Крапка"),
@@ -21,7 +20,46 @@ SHAPE_CLASSES = {
     "Ellipse": EllipseShape,
 }
 
-# UPDATRE
+
+def make_icon(kind, size=24):
+    img = tk.PhotoImage(width=size, height=size)  
+
+    def px(x, y):
+        for dx in (0, 1):
+            for dy in (0, 1):
+                if 0 <= x + dx < size and 0 <= y + dy < size:
+                    img.put("black", (x + dx, y + dy))
+
+    lo, hi = 4, size - 6
+
+    if kind == "Dot":
+        c = size // 2
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                if dx * dx + dy * dy <= 9:
+                    img.put("black", (c + dx, c + dy))
+
+    elif kind == "Line":
+        steps = hi - lo
+        for i in range(steps + 1):
+            px(lo + i, hi - i)
+
+    elif kind == "Rectangle":
+        for x in range(lo, hi + 1):
+            px(x, lo + 2)
+            px(x, hi - 2)
+        for y in range(lo + 2, hi - 1):
+            px(lo, y)
+            px(hi, y)
+
+    elif kind == "Ellipse":
+        cx = cy = (size - 2) / 2
+        a, b = size / 2 - 3, size / 2 - 6
+        for i in range(0, 720):
+            t = math.radians(i / 2)
+            px(round(cx + a * math.cos(t)), round(cy + b * math.sin(t)))
+
+    return img
 
 
 class Tooltip:
@@ -57,6 +95,8 @@ class PaintApp(tk.Tk):
         self.start_x = None
         self.start_y = None
         self.current_rubber_shape = None
+
+        self.icons = {}
 
         self.init_menu()
 
@@ -96,26 +136,26 @@ class PaintApp(tk.Tk):
 
         self.config(menu=menubar)
 
-# UP тулки
-
     def init_toolbar(self):
         toolbar = tk.Frame(self, bd=1, relief=tk.RAISED)
         toolbar.pack(side=tk.TOP, fill=tk.X)
 
         for value, name in TOOLS:
+            self.icons[value] = make_icon(value)
+
             btn = tk.Radiobutton(
                 toolbar,
-                text=name,
+                image=self.icons[value],
                 variable=self.current_tool,
                 value=value,
                 indicatoron=False,
-                padx=8,
+                selectcolor="#cce4f7",
+                padx=4,
+                pady=4,
                 command=self.on_tool_changed
             )
             btn.pack(side=tk.LEFT, padx=2, pady=2)
             Tooltip(btn, name)
-
-# ВИніс
 
     def delete_rubber(self):
         if self.current_rubber_shape:
@@ -159,7 +199,7 @@ class PaintApp(tk.Tk):
     def on_release(self, event):
         tool = self.current_tool.get()
 
-        if self.start_x == None:
+        if self.start_x is None:
             return
 
         shape = None
