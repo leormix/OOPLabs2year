@@ -14,7 +14,7 @@ class Shape(ABC):
 
     @staticmethod
     def _rubber_style():
-        return {"outline": "black", "fill": "", "dash": (4, 4)}
+        return {"outline": "black", "fill": "black", "dash": (4, 4)}
 
 
 class PointShape(Shape):
@@ -25,7 +25,7 @@ class PointShape(Shape):
         r = 2
         return canvas.create_oval(
             self.x1 - r, self.y1 - r, self.x1 + r, self.y1 + r,
-            fill="black", outline="black"
+            **self._rubber_style()
         )
 
 

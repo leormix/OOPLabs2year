@@ -30,7 +30,7 @@ class Tooltip:
 
     def show(self, event):
         self.tip = tk.Toplevel(self.widget)
-        self.tip.wm_overrideredirect(True)  # без рамки вікна
+        self.tip.wm_overrideredirect(True)  
         self.tip.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
         tk.Label(self.tip, text=self.text, bg="lightyellow",
                  relief=tk.SOLID, bd=1).pack()
