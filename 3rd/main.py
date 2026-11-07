@@ -6,6 +6,8 @@ from shapes import RectangleShape
 from shapes import EllipseShape
 
 
+# UPd list dict
+
 TOOLS = [
     ("Dot", "Крапка"),
     ("Line", "Лінія"),
@@ -19,6 +21,8 @@ SHAPE_CLASSES = {
     "Ellipse": EllipseShape,
 }
 
+# UPDATRE
+
 
 class Tooltip:
     def __init__(self, widget, text):
@@ -30,7 +34,7 @@ class Tooltip:
 
     def show(self, event):
         self.tip = tk.Toplevel(self.widget)
-        self.tip.wm_overrideredirect(True)  
+        self.tip.wm_overrideredirect(True)
         self.tip.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
         tk.Label(self.tip, text=self.text, bg="lightyellow",
                  relief=tk.SOLID, bd=1).pack()
@@ -92,6 +96,8 @@ class PaintApp(tk.Tk):
 
         self.config(menu=menubar)
 
+# UP тулки
+
     def init_toolbar(self):
         toolbar = tk.Frame(self, bd=1, relief=tk.RAISED)
         toolbar.pack(side=tk.TOP, fill=tk.X)
@@ -108,6 +114,8 @@ class PaintApp(tk.Tk):
             )
             btn.pack(side=tk.LEFT, padx=2, pady=2)
             Tooltip(btn, name)
+
+# ВИніс
 
     def delete_rubber(self):
         if self.current_rubber_shape:
