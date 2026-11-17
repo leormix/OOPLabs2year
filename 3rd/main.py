@@ -22,7 +22,7 @@ SHAPE_CLASSES = {
 
 
 def make_icon(kind, size=24):
-    img = tk.PhotoImage(width=size, height=size)  
+    img = tk.PhotoImage(width=size, height=size)
 
     def px(x, y):
         for dx in (0, 1):

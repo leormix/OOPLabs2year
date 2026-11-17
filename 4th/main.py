@@ -1,0 +1,271 @@
+import math
+import tkinter as tk
+from tkinter import messagebox
+from shapes import PointShape, LineShape, RectangleShape, EllipseShape, LineWithCircles, CubeFrame
+
+
+TOOLS = [
+    ("Dot", "Крапка"),
+    ("Line", "Лінія"),
+    ("Rectangle", "Прямокутник"),
+    ("Ellipse", "Еліпс"),
+    ("CubeFrame", "Куб"),
+    ("LineWithCircles", "Лінія з кружками")
+]
+
+SHAPE_CLASSES = {
+    "Line": LineShape,
+    "Rectangle": RectangleShape,
+    "Ellipse": EllipseShape,
+    "LineWithCircles": LineWithCircles,
+    "CubeFrame": CubeFrame,
+}
+
+
+def make_icon(kind, size=24):
+    img = tk.PhotoImage(width=size, height=size)
+
+    def px(x, y):
+        for dx in (0, 1):
+            for dy in (0, 1):
+                if 0 <= x + dx < size and 0 <= y + dy < size:
+                    img.put("black", (x + dx, y + dy))
+
+    lo, hi = 4, size - 6
+
+    if kind == "Dot":
+        c = size // 2
+        for dx in range(-3, 4):
+            for dy in range(-3, 4):
+                if dx * dx + dy * dy <= 9:
+                    img.put("black", (c + dx, c + dy))
+
+    elif kind == "Line":
+        steps = hi - lo
+        for i in range(steps + 1):
+            px(lo + i, hi - i)
+
+    elif kind == "Rectangle":
+        for x in range(lo, hi + 1):
+            px(x, lo + 2)
+            px(x, hi - 2)
+        for y in range(lo + 2, hi - 1):
+            px(lo, y)
+            px(hi, y)
+
+    elif kind == "Ellipse":
+        cx = cy = (size - 2) / 2
+        a, b = size / 2 - 3, size / 2 - 6
+        for i in range(0, 720):
+            t = math.radians(i / 2)
+            px(round(cx + a * math.cos(t)), round(cy + b * math.sin(t)))
+
+    elif kind == "LineWithCircles":
+        # result = []
+        steps = hi - lo
+        for i in range(steps + 1):
+            px(lo + i, hi - i)
+
+        for dx in range(-2, 3):
+
+            for dy in range(-2, 3):
+                if dx * dx + dy * dy <= 4:
+                    center_x = ((lo + dx) + (hi + dx)) // 2
+                    center_y = ((hi + dy) + (lo + dy)) // 2
+                    img.put("black", (lo + dx, hi + dy))
+                    img.put("black", (center_x, center_y))
+                    img.put("black", (hi + dx, lo + dy))
+
+    elif kind == "CubeFrame":
+        for x in range(lo, hi - 2):
+            px(x, lo + 2)
+            px(x, hi - 2)
+        for y in range(lo + 2, hi - 1):
+            px(lo, y)
+            px(hi - 2, y)
+        for i in range(3):
+            px(lo + i + 2, lo + 2 - i)
+            px(hi - 2 + i + 2, lo + 2 - i)
+            px(hi - 2 + i + 2, hi - 2 - i)
+
+    return img
+
+
+class Tooltip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tip = None
+        widget.bind("<Enter>", self.show)
+        widget.bind("<Leave>", self.hide)
+
+    def show(self, event):
+        self.tip = tk.Toplevel(self.widget)
+        self.tip.wm_overrideredirect(True)
+        self.tip.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+        tk.Label(self.tip, text=self.text, bg="lightyellow",
+                 relief=tk.SOLID, bd=1).pack()
+
+    def hide(self, event):
+        if self.tip:
+            self.tip.destroy()
+            self.tip = None
+
+
+class MyEditor(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Main window")
+        self.geometry("500x400")
+
+        self.current_tool = tk.StringVar(value="Dot")
+        self.shapes = []
+
+        self.start_x = None
+        self.start_y = None
+        self.current_rubber_shape = None
+
+        self.icons = {}
+
+        self.init_menu()
+
+        self.init_toolbar()
+
+        self.canvas = tk.Canvas(self, bg="white")
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.canvas.bind("<ButtonPress-1>", self.on_press)
+        self.canvas.bind("<B1-Motion>", self.on_motion)
+        self.canvas.bind("<ButtonRelease-1>", self.on_release)
+
+        self.on_tool_changed()
+
+    def init_menu(self):
+        menubar = tk.Menu(self)
+
+        file_menu = tk.Menu(menubar, tearoff=0)
+        file_menu.add_command(label='Exit', command=self.quit)
+        menubar.add_cascade(label='File', menu=file_menu)
+
+        objects_menu = tk.Menu(menubar, tearoff=0)
+
+        for value, name in TOOLS:
+            objects_menu.add_radiobutton(
+                label=name,
+                variable=self.current_tool,
+                value=value,
+                command=self.on_tool_changed
+            )
+        menubar.add_cascade(label='Objects', menu=objects_menu)
+
+        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu.add_command(label="About", command=self.show_about)
+
+        menubar.add_cascade(label="Help", menu=help_menu)
+
+        self.config(menu=menubar)
+
+    def init_toolbar(self):
+        toolbar = tk.Frame(self, bd=1, relief=tk.RAISED)
+        toolbar.pack(side=tk.TOP, fill=tk.X)
+
+        for value, name in TOOLS:
+            self.icons[value] = make_icon(value)
+
+            btn = tk.Radiobutton(
+                toolbar,
+                image=self.icons[value],
+                variable=self.current_tool,
+                value=value,
+                indicatoron=False,
+                selectcolor="#cce4f7",
+                padx=4,
+                pady=4,
+                command=self.on_tool_changed
+            )
+            btn.pack(side=tk.LEFT, padx=2, pady=2)
+            Tooltip(btn, name)
+
+# updated
+
+    def delete_rubber(self):
+        if self.current_rubber_shape:
+            if isinstance(self.current_rubber_shape, list):
+                for item in self.current_rubber_shape:
+                    self.canvas.delete(item)
+            else:
+                self.canvas.delete(self.current_rubber_shape)
+            self.current_rubber_shape = None
+
+    def on_tool_changed(self):
+        name = dict(TOOLS)[self.current_tool.get()]
+        self.title(f"Lab3 - {name}")
+
+    def show_about(self):
+        messagebox.showinfo("Довідка", 'Лабка Намбер 4')
+
+    def add_shape_if_allowed(self, shape):
+        if len(self.shapes) < 103:
+            self.shapes.append(shape)
+            shape.show(self.canvas)
+
+# UPdated
+
+    def on_press(self, event):
+        tool = self.current_tool.get()
+        if tool == "Dot":
+            shape = PointShape(event.x, event.y)
+            self.add_shape_if_allowed(shape)
+        else:
+            self.start_x = event.x
+            self.start_y = event.y
+
+    def on_motion(self, event):
+        tool = self.current_tool.get()
+        if self.start_x is None:
+            return
+
+        self.delete_rubber()
+
+        shape_class = SHAPE_CLASSES.get(tool)
+
+        if shape_class:
+            temp = shape_class(self.start_x, self.start_y, event.x, event.y)
+            self.current_rubber_shape = temp.show(self.canvas, rubber=True)
+
+    def on_release(self, event):
+        tool = self.current_tool.get()
+
+        if self.start_x is None:
+            return
+
+        shape = None
+
+        shape_class = SHAPE_CLASSES.get(tool)
+        if shape_class:
+            shape = shape_class(self.start_x, self.start_y, event.x, event.y)
+
+        self.delete_rubber()
+
+        if shape:
+            self.add_shape_if_allowed(shape)
+
+        self.start_x = None
+        self.start_y = None
+
+
+# Updated
+
+def main():
+    editor = MyEditor()
+    try:
+        editor.mainloop()
+    finally:
+        try:
+            editor.destroy()
+        except tk.TclError:
+            pass
+
+
+if __name__ == "__main__":
+    main()
