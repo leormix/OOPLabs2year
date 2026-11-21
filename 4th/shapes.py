@@ -45,15 +45,18 @@ class LineShape(Shape):
 class RectangleShape(Shape):
 
     def show(self, canvas, rubber=False, outline="black", fill="green"):
-        dx = (self.x1 - self.x2)
-        dy = (self.y1 - self.y2)
+        left, right = sorted((self.x1, self.x2))
+        top, bottom = sorted((self.y1, self.y2))
 
         if rubber:
-            return canvas.create_rectangle(self.x1 - dx, self.y1 - dy, self.x1 + dx, self.y1 + dy,
-                                           outline=outline, fill="", dash=(4, 4))
+            return canvas.create_rectangle(
+                left, top, right, bottom,
+                outline=outline, fill="", dash=(4, 4)
+            )
+
         return canvas.create_rectangle(
-            self.x1 - dx, self.y1 - dy, self.x1 + dx, self.y1 + dy,
-            fill='green'
+            left, top, right, bottom,
+            outline=outline, fill=fill
         )
 
 

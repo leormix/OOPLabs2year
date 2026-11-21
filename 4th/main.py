@@ -199,7 +199,7 @@ class MyEditor(tk.Tk):
 
     def on_tool_changed(self):
         name = dict(TOOLS)[self.current_tool.get()]
-        self.title(f"Lab3 - {name}")
+        self.title(f"Lab4 - {name}")
 
     def show_about(self):
         messagebox.showinfo("Довідка", 'Лабка Намбер 4')
@@ -219,6 +219,8 @@ class MyEditor(tk.Tk):
         else:
             self.start_x = event.x
             self.start_y = event.y
+
+# ------------------//
 
     def on_motion(self, event):
         tool = self.current_tool.get()
